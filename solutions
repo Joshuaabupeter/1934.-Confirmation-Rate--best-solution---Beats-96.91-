@@ -1,0 +1,21 @@
+with count_confirmation as(select a.user_id,
+case
+when b.action='confirmed' then 1
+else 0
+end as 'confirmed',
+case
+when b.action='timeout' then 1
+else 0
+end as 'timeout'
+from Signups as a
+left join Confirmations as b
+using (user_id)),
+
+sum_confirmations as (select user_id, sum(confirmed) as c,sum(timeout) as e from
+count_confirmation
+group by 1
+)
+select user_id, ifnull(round(c/(sum(c)+sum(e)),2),0) as confirmation_rate
+from sum_confirmations
+group by 1
+
